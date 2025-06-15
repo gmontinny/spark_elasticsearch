@@ -1,6 +1,6 @@
 """
-Simple test script to verify that the Elasticsearch indexing functionality is working correctly.
-This script tests only the direct Elasticsearch client functionality, not the Spark integration.
+Script de teste simples para verificar se a funcionalidade de indexação do Elasticsearch está funcionando corretamente.
+Este script testa apenas a funcionalidade do cliente Elasticsearch direto, não a integração com o Spark.
 """
 
 import os
@@ -9,16 +9,16 @@ import logging
 import time
 from elasticsearch import Elasticsearch
 
-# Add the project root to the Python path
+# Adicionar a raiz do projeto ao caminho Python
 project_root = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, project_root)
 
-# Import configuration and Elasticsearch utilities
+# Importar configuração e utilitários do Elasticsearch
 from config.config import ES_CONFIG
 from src.elasticsearch_utils import create_elasticsearch_client, ensure_index_exists, index_documents
 from src.file_processors import process_file
 
-# Configure logging
+# Configurar logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -26,7 +26,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def test_elasticsearch_connection():
-    """Test connection to Elasticsearch."""
+    """Testar conexão com o Elasticsearch."""
     try:
         es = create_elasticsearch_client(
             ES_CONFIG['host'], 
@@ -34,17 +34,17 @@ def test_elasticsearch_connection():
             ES_CONFIG['scheme']
         )
         if es.ping():
-            logger.info("Successfully connected to Elasticsearch")
+            logger.info("Conectado com sucesso ao Elasticsearch")
             return True, es
         else:
-            logger.error("Failed to ping Elasticsearch")
+            logger.error("Falha ao fazer ping no Elasticsearch")
             return False, None
     except Exception as e:
-        logger.error(f"Error connecting to Elasticsearch: {str(e)}")
+        logger.error(f"Erro ao conectar ao Elasticsearch: {str(e)}")
         return False, None
 
 def check_index_exists(es, index_name):
-    """Check if the specified index exists in Elasticsearch."""
+    """Verificar se o índice especificado existe no Elasticsearch."""
     try:
         if es.indices.exists(index=index_name):
             logger.info(f"Index '{index_name}' exists")
@@ -57,104 +57,104 @@ def check_index_exists(es, index_name):
         return False
 
 def count_documents(es, index_name):
-    """Count the number of documents in the specified index."""
+    """Contar o número de documentos no índice especificado."""
     try:
-        # Refresh the index to ensure all documents are visible
+        # Atualizar o índice para garantir que todos os documentos estejam visíveis
         es.indices.refresh(index=index_name)
-        
-        # Count documents
+
+        # Contar documentos
         count = es.count(index=index_name)['count']
-        logger.info(f"Found {count} documents in index '{index_name}'")
+        logger.info(f"Encontrados {count} documentos no índice '{index_name}'")
         return count
     except Exception as e:
-        logger.error(f"Error counting documents: {str(e)}")
+        logger.error(f"Erro ao contar documentos: {str(e)}")
         return 0
 
 def process_directory(directory_path):
-    """Process all files in the specified directory and its subdirectories."""
+    """Processar todos os arquivos no diretório especificado e seus subdiretórios."""
     if not os.path.exists(directory_path):
-        logger.error(f"Directory does not exist: {directory_path}")
+        logger.error(f"Diretório não existe: {directory_path}")
         return []
 
     documents = []
     file_count = 0
     processed_count = 0
 
-    logger.info(f"Processing files in directory: {directory_path}")
+    logger.info(f"Processando arquivos no diretório: {directory_path}")
 
     for root, _, files in os.walk(directory_path):
         for file in files:
             file_path = os.path.join(root, file)
             file_count += 1
 
-            # Process the file
+            # Processar o arquivo
             doc = process_file(file_path)
             if doc:
                 documents.append(doc)
                 processed_count += 1
 
-    logger.info(f"Processed {processed_count} of {file_count} files successfully")
+    logger.info(f"Processados {processed_count} de {file_count} arquivos com sucesso")
     return documents
 
 def run_simple_test():
-    """Run a simple test to verify the Elasticsearch indexing functionality."""
-    logger.info("=== Starting simple test ===")
-    
-    # Test Elasticsearch connection
+    """Executar um teste simples para verificar a funcionalidade de indexação do Elasticsearch."""
+    logger.info("=== Iniciando teste simples ===")
+
+    # Testar conexão com o Elasticsearch
     connection_success, es = test_elasticsearch_connection()
     if not connection_success:
-        logger.error("Test failed: Could not connect to Elasticsearch")
+        logger.error("Teste falhou: Não foi possível conectar ao Elasticsearch")
         return False
-    
-    # Process files in the input directory
+
+    # Processar arquivos no diretório de entrada
     input_directory = os.path.join(os.getcwd(), "data")
     documents = process_directory(input_directory)
-    
+
     if not documents:
-        logger.warning("No valid documents found for indexing")
+        logger.warning("Nenhum documento válido encontrado para indexação")
         return False
-    
-    # Index documents in Elasticsearch
+
+    # Indexar documentos no Elasticsearch
     try:
         success, failed = index_documents(es, ES_CONFIG['index'], documents)
-        logger.info(f"Indexed {success} documents in Elasticsearch")
-        
+        logger.info(f"Indexados {success} documentos no Elasticsearch")
+
         if failed:
-            logger.warning(f"Failed to index {len(failed)} documents")
+            logger.warning(f"Falha ao indexar {len(failed)} documentos")
     except Exception as e:
-        logger.error(f"Error indexing documents: {str(e)}")
+        logger.error(f"Erro ao indexar documentos: {str(e)}")
         return False
-    
-    # Give Elasticsearch some time to process the documents
-    logger.info("Waiting for Elasticsearch to process documents...")
+
+    # Dar algum tempo para o Elasticsearch processar os documentos
+    logger.info("Aguardando o Elasticsearch processar os documentos...")
     time.sleep(2)
-    
-    # Check if index exists
+
+    # Verificar se o índice existe
     if not check_index_exists(es, ES_CONFIG['index']):
-        logger.error(f"Test failed: Index '{ES_CONFIG['index']}' was not created")
+        logger.error(f"Teste falhou: Índice '{ES_CONFIG['index']}' não foi criado")
         return False
-    
-    # Count documents in the index
+
+    # Contar documentos no índice
     doc_count = count_documents(es, ES_CONFIG['index'])
     if doc_count > 0:
-        logger.info(f"Test passed: Successfully indexed {doc_count} documents using direct Elasticsearch client")
+        logger.info(f"Teste passou: Indexados com sucesso {doc_count} documentos usando o cliente Elasticsearch direto")
         return True
     else:
-        logger.error("Test failed: No documents were indexed")
+        logger.error("Teste falhou: Nenhum documento foi indexado")
         return False
 
 if __name__ == "__main__":
     try:
         success = run_simple_test()
         if success:
-            logger.info("=== Simple test passed! The Elasticsearch indexing functionality is working correctly. ===")
-            print("\n\n=== TEST RESULT: PASSED ===\n\n")
+            logger.info("=== Teste simples passou! A funcionalidade de indexação do Elasticsearch está funcionando corretamente. ===")
+            print("\n\n=== RESULTADO DO TESTE: PASSOU ===\n\n")
             sys.exit(0)
         else:
-            logger.error("=== Simple test failed! The Elasticsearch indexing functionality is not working correctly. ===")
-            print("\n\n=== TEST RESULT: FAILED ===\n\n")
+            logger.error("=== Teste simples falhou! A funcionalidade de indexação do Elasticsearch não está funcionando corretamente. ===")
+            print("\n\n=== RESULTADO DO TESTE: FALHOU ===\n\n")
             sys.exit(1)
     except Exception as e:
-        logger.error(f"=== Unexpected error during test execution: {str(e)} ===")
-        print("\n\n=== TEST RESULT: ERROR ===\n\n")
+        logger.error(f"=== Erro inesperado durante a execução do teste: {str(e)} ===")
+        print("\n\n=== RESULTADO DO TESTE: ERRO ===\n\n")
         sys.exit(2)
