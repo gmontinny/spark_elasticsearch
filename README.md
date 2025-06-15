@@ -62,10 +62,20 @@ docker-compose up -d
 
 1. Coloque seus documentos no diretório `data/`.
 
-2. Execute a aplicação:
+2. Indexe os documentos:
 
 ```bash
-python src/main.py
+python src/main.py index
+```
+
+3. Pesquise documentos:
+
+```bash
+# Pesquisa básica
+python src/main.py search "texto para pesquisar"
+
+# Pesquisa avançada com filtros
+python src/main.py advanced-search --query "texto para pesquisar" --type pdf --min-size 1000 --sort-by file_name
 ```
 
 ## Configuração
@@ -120,6 +130,18 @@ As seguintes melhorias foram feitas na implementação original:
    - Operações do Spark otimizadas
    - Adicionado processamento em lote para indexação no Elasticsearch
 
-6. **Documentação**:
+6. **Funcionalidade de Pesquisa**:
+   - Implementada pesquisa de texto completo nos documentos indexados
+   - Adicionada pesquisa avançada com filtros por tipo de arquivo e tamanho
+   - Suporte para ordenação de resultados por relevância, tamanho ou nome do arquivo
+   - Destaque (highlighting) de trechos relevantes nos resultados da pesquisa
+
+7. **Interface de Linha de Comando**:
+   - Adicionados comandos para indexação e pesquisa
+   - Suporte para argumentos de linha de comando para configurar pesquisas
+   - Melhor feedback ao usuário com formatação de resultados
+
+8. **Documentação**:
    - Adicionadas docstrings abrangentes
    - Criado este arquivo README
+   - Incluídos exemplos de uso para todas as funcionalidades

@@ -17,7 +17,7 @@ ES_CONFIG = {
 SPARK_CONFIG = {
     'app_name': 'DocumentIndexer',
     'packages': 'org.elasticsearch:elasticsearch-spark-30_2.12:8.11.0',
-    'master': 'local[*]'  # Usar todos os núcleos disponíveis
+    'master': 'local[*]'  # Usa todos os núcleos disponíveis
 }
 
 # Variáveis de ambiente
@@ -33,7 +33,7 @@ ENV_VARS = {
 APP_CONFIG = {
     'input_directory': os.path.join(os.getcwd(), "data"),
     'log_level': 'INFO',
-    'batch_size': 100  # Número de documentos a processar em um lote
+    'batch_size': 100  # Número de documentos para processar em um lote
 }
 
 # Tipos de arquivo suportados e suas extensões

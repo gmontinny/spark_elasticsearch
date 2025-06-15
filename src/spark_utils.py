@@ -7,7 +7,7 @@ import logging
 import os
 from typing import List, Dict, Any
 
-# Importar findspark para ajudar a localizar a instalação do Spark
+# Importa findspark para ajudar a localizar a instalação do Spark
 try:
     import findspark
     findspark.init(spark_home=os.environ.get('SPARK_HOME'))
@@ -17,7 +17,7 @@ except ImportError:
 
 from pyspark.sql import SparkSession, DataFrame
 
-# Configurar logging
+# Configura o logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -31,13 +31,13 @@ def create_spark_session(app_name: str, packages: str, master: str = 'local[*]')
     Args:
         app_name: Nome da aplicação Spark
         packages: Lista de pacotes separados por vírgula para incluir
-        master: URL do Spark master
+        master: URL do mestre Spark
 
     Returns:
         Objeto SparkSession
     """
     try:
-        # Criar a SparkSession usando o padrão builder
+        # Cria a SparkSession usando o padrão builder
         # A SparkSession criará ou reutilizará um SparkContext conforme necessário
         builder = SparkSession.builder \
             .appName(app_name) \
@@ -47,12 +47,12 @@ def create_spark_session(app_name: str, packages: str, master: str = 'local[*]')
             .master(master)
 
         try:
-            # Tentar habilitar o suporte Hive, o que pode ajudar com certos problemas de inicialização
+            # Tenta habilitar o suporte Hive, o que pode ajudar com certos problemas de inicialização
             builder = builder.enableHiveSupport()
         except Exception as e:
             logger.warning(f"Não foi possível habilitar o suporte Hive: {str(e)}")
 
-        # Tentar criar a SparkSession
+        # Tenta criar a SparkSession
         try:
             # Primeira tentativa: usar o builder diretamente
             spark = builder.getOrCreate()
@@ -70,7 +70,7 @@ def create_spark_session(app_name: str, packages: str, master: str = 'local[*]')
                 logger.error(f"Todas as tentativas de criar SparkSession falharam: {str(e2)}")
                 raise
 
-        # Definir nível de log após a sessão ser criada
+        # Define o nível de log após a sessão ser criada
         spark.sparkContext.setLogLevel("WARN")
 
         logger.info(f"Sessão Spark criada: {app_name}")
@@ -91,8 +91,8 @@ def create_dataframe_from_documents(spark: SparkSession, documents: List[Dict[st
         DataFrame Spark contendo os documentos
     """
     if not documents:
-        logger.warning("Não há documentos para criar o DataFrame")
-        # Criar um DataFrame vazio com o esquema esperado
+        logger.warning("Nenhum documento para criar DataFrame")
+        # Cria um DataFrame vazio com o esquema esperado
         return spark.createDataFrame([], schema=["file_name", "file_path", "file_type", "content", "file_size"])
 
     try:

@@ -1,6 +1,6 @@
 """
-Script de teste para verificar se a aplicação de indexação de documentos está funcionando corretamente.
-Este script executa a aplicação principal e verifica se os documentos são indexados com sucesso no Elasticsearch.
+Test script to verify that the document indexer application is running correctly.
+This script runs the main application and checks if documents are successfully indexed in Elasticsearch.
 """
 
 import os
@@ -9,16 +9,16 @@ import logging
 import time
 from elasticsearch import Elasticsearch
 
-# Adicionar a raiz do projeto ao caminho Python
+# Add the project root to the Python path
 project_root = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, project_root)
 
-# Importar configuração e função principal
+# Import configuration and main function
 from config.config import ES_CONFIG
 from src.main import main
 from src.elasticsearch_utils import create_elasticsearch_client
 
-# Configurar logging
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -26,7 +26,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def test_elasticsearch_connection():
-    """Testar conexão com o Elasticsearch."""
+    """Test connection to Elasticsearch."""
     try:
         es = create_elasticsearch_client(
             ES_CONFIG['host'], 
@@ -34,13 +34,13 @@ def test_elasticsearch_connection():
             ES_CONFIG['scheme']
         )
         if es.ping():
-            logger.info("Conectado com sucesso ao Elasticsearch")
+            logger.info("Successfully connected to Elasticsearch")
             return True, es
         else:
-            logger.error("Falha ao fazer ping no Elasticsearch")
+            logger.error("Failed to ping Elasticsearch")
             return False, None
     except Exception as e:
-        logger.error(f"Erro ao conectar ao Elasticsearch: {str(e)}")
+        logger.error(f"Error connecting to Elasticsearch: {str(e)}")
         return False, None
 
 def check_index_exists(es, index_name):
