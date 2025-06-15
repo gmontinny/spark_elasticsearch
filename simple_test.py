@@ -47,13 +47,13 @@ def check_index_exists(es, index_name):
     """Verificar se o índice especificado existe no Elasticsearch."""
     try:
         if es.indices.exists(index=index_name):
-            logger.info(f"Index '{index_name}' exists")
+            logger.info(f"Índice '{index_name}' existe")
             return True
         else:
-            logger.error(f"Index '{index_name}' does not exist")
+            logger.error(f"Índice '{index_name}' não existe")
             return False
     except Exception as e:
-        logger.error(f"Error checking if index exists: {str(e)}")
+        logger.error(f"Erro ao verificar se o índice existe: {str(e)}")
         return False
 
 def count_documents(es, index_name):
